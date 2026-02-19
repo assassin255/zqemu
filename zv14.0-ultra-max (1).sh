@@ -43,8 +43,8 @@ if [[ "$choice" == "y" ]]; then
     OS_ID="$(. /etc/os-release && echo "$ID")"
     OS_VER="$(. /etc/os-release && echo "$VERSION_ID")"
 
-    sudo apt update
-    sudo apt install -y wget gnupg build-essential ninja-build git python3 python3-venv \
+   silent sudo apt update
+   silent sudo apt install -y wget gnupg build-essential ninja-build git python3 python3-venv \
         python3-pip libglib2.0-dev libpixman-1-dev zlib1g-dev libslirp-dev pkg-config \
         meson aria2 ovmf qemu-utils libcap-ng-dev libaio-dev
 
@@ -350,7 +350,7 @@ if [[ "$choice" == "y" ]]; then
     info "Running configure..."
 
     # ── QEMU 10.x configure — ONLY valid meson flags ──
-    /tmp/qemu-src/configure \
+   silent /tmp/qemu-src/configure \
         --prefix=/opt/qemu-optimized \
         --target-list=x86_64-softmmu \
         --enable-tcg --enable-slirp --enable-coroutine-pool \
@@ -565,17 +565,10 @@ $QBIN \
     -no-user-config \
     -display none \
     -vga virtio \
-    -daemonize \
-    2>/tmp/qemu_error.log || true
+    -daemonize
 
 sleep 3
 
-# Check if VM actually started
-if pgrep -f "qemu-system-x86_64.*win.img" > /dev/null 2>&1; then
-  msg "VM started successfully!"
-else
-  err "VM có thể không khởi động được. Kiểm tra /tmp/qemu_error.log"
-  cat /tmp/qemu_error.log 2>/dev/null
 fi
 
 use_rdp=$(ask "🛰️ Tiếp tục mở port để kết nối đến VM? (y/n): " "n")
