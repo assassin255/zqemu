@@ -343,13 +343,6 @@ $QBIN \
 
 sleep 3
 
-if pgrep -f qemu-system-x86_64 > /dev/null; then
-  echo "✅ VM đã khởi động thành công!"
-else
-  echo "❌ VM không khởi động được!"
-  echo "📋 Error log:"
-  cat /tmp/qemu_error.log
-  exit 1
 fi
 
 use_rdp=$(ask "🛰️ Tiếp tục mở port để kết nối đến VM? (y/n): " "n")
