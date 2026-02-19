@@ -569,7 +569,6 @@ $QBIN \
 
 sleep 3
 
-fi
 
 use_rdp=$(ask "🛰️ Tiếp tục mở port để kết nối đến VM? (y/n): " "n")
 
