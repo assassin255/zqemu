@@ -1101,7 +1101,7 @@ if [[ "$use_rdp" == "y" ]]; then
   echo "══════════════════════════════════════════════"
   echo "🟢 Status      : RUNNING"
   echo "⏱ GUI Mode   : Headless / RDP"
-  echo "🔥 Build       : QEMU v17.0 OMEGA"
+  echo "🔥 Build       : zVM v17.0 OMEGA"
   echo "🔧 TB Buffer   : 16MB | TB Cache: 32K entries"
   echo "🔧 AIO         : $AIO_BACKEND"
   echo "══════════════════════════════════════════════"
