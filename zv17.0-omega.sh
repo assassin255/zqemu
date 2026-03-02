@@ -127,7 +127,7 @@ if [[ "$choice" == "y" ]]; then
     info "=== [2/6] Cloning QEMU 10.2.1 ==="
     rm -rf /tmp/qemu-src /tmp/qemu-build
     cd /tmp
-    silent git clone --depth 1 --branch v10.2.0 https://gitlab.com/qemu-project/qemu.git qemu-src
+    silent git clone --depth 1 --branch v10.2.1 https://gitlab.com/qemu-project/qemu.git qemu-src
 
     # ══════════════════════════════════════════════════════════════════
     #  PHASE 3: V16.1 HYPER MAX PATCHES (300+)
