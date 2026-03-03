@@ -1294,15 +1294,8 @@ cpu_host=$(grep -m1 "model name" /proc/cpuinfo | sed 's/^.*: //')
 # ── v19: Enhanced CPU model with EXTREME Hyper-V enlightenments ──
 cpu_model="qemu64,hypervisor=off,tsc=on,pmu=off,l3-cache=on"
 cpu_model="$cpu_model,+cmov,+mmx,+fxsr,+sse2,+ssse3,+sse4.1,+sse4.2"
-cpu_model="$cpu_model,+popcnt,+aes,+cx16,+x2apic,+sep,+pat,+pse"
-cpu_model="$cpu_model,+lahf_lm,+rdtscp,+movbe,+abm,+bmi1,+bmi2,+avx,+avx2"
-# v19: Full Hyper-V enlightenments suite
-cpu_model="$cpu_model,hv-relaxed=on,hv-vapic=on,hv-spinlocks=8191,hv-time=on"
-cpu_model="$cpu_model,hv-frequencies=on,hv-reenlightenment=on"
-cpu_model="$cpu_model,hv-tlbflush=on,hv-ipi=on"
-# v19 NEW: Additional Hyper-V enlightenments
-cpu_model="$cpu_model,hv-stimer=on,hv-vpindex=on"
-cpu_model="$cpu_model,hv-runtime=on,hv-synic=on"
+cpu_model="$cpu_model,+popcnt,+cx16,+sep,+pat,+pse"
+cpu_model="$cpu_model,+lahf_lm,+rdtscp"
 cpu_model="$cpu_model,model-id=${cpu_host}"
 
 read -rp "⚙ CPU core (default 4): " cpu_core
@@ -1357,7 +1350,7 @@ $TASKSET_CMD $QBIN \
     -L /opt/qemu-optimized/share/qemu \
     -L /usr/share/qemu \
     -L /usr/lib/ipxe/qemu \
-    -machine q35,hpet=off,vmport=off,kernel-irqchip=split \
+    -machine q35,hpet=off,vmport=off \
     -overcommit mem-lock=off \
     -cpu "$cpu_model" \
     -smp "$cpu_core",sockets=1,cores="$cpu_core",threads=1 \
