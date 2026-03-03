@@ -1293,9 +1293,7 @@ cpu_host=$(grep -m1 "model name" /proc/cpuinfo | sed 's/^.*: //')
 
 # ── v19: Enhanced CPU model with EXTREME Hyper-V enlightenments ──
 cpu_model="qemu64,hypervisor=off,tsc=on,pmu=off,l3-cache=on"
-cpu_model="$cpu_model,+cmov,+mmx,+fxsr,+sse2,+ssse3,+sse4.1,+sse4.2"
-cpu_model="$cpu_model,+popcnt,+cx16,+sep,+pat,+pse"
-cpu_model="$cpu_model,+lahf_lm,+rdtscp"
+cpu_model="$cpu_model,+sse2,+ssse3,+sse4.1,+sse4.2"
 cpu_model="$cpu_model,model-id=${cpu_host}"
 
 read -rp "⚙ CPU core (default 4): " cpu_core
