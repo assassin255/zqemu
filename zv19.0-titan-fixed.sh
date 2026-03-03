@@ -1145,7 +1145,7 @@ if [[ "$choice" == "y" ]]; then
     silent /tmp/qemu-src/configure \
         --prefix=/opt/qemu-optimized \
         --target-list=x86_64-softmmu \
-        --enable-tcg --enable-slirp --enable-coroutine-pool --enable-malloc-trim --enable-linux-io-uring \
+        --enable-tcg --enable-slirp --enable-lto --enable-coroutine-pool --enable-malloc-trim --enable-linux-io-uring \
         --disable-kvm --disable-xen \
         --disable-gtk --disable-sdl --disable-spice --disable-vnc \
         --disable-plugins --disable-debug-info --disable-debug-tcg \
