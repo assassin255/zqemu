@@ -1036,7 +1036,7 @@ silent $QIMG resize win.img "+${extra_gb}G"
 cpu_host=$(grep -m1 "model name" /proc/cpuinfo | sed 's/^.*: //')
 
 # ── v20: Enhanced CPU model with EXTREME Hyper-V enlightenments ──
-cpu_model="qemu64,hypervisor=off,tsc=on,pmu=off,l3-cache=on"
+cpu_model="max,hypervisor=off,tsc=on,pmu=off,l3-cache=on"
 cpu_model="$cpu_model,+sse2,+ssse3,+sse4.1,+sse4.2"
 cpu_model="$cpu_model,model-id=${cpu_host}"
 
