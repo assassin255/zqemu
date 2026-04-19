@@ -29,6 +29,7 @@
 #include "qemu/osdep.h"
 #include "qemu/units.h"
 #include "qemu/log.h"
+#include "qemu/error-report.h"
 #include "hw/pci/pci_device.h"
 #include "hw/pci/msi.h"
 #include "hw/pci/pcie.h"
@@ -228,9 +229,32 @@ static const MemoryRegionOps emulated_nvidia_gpu_mmio_ops = {
 };
 
 /* ════════════════════════════════════════════════════════════════
- *  BAR1 — VRAM (simple read/write memory)
+ *  BAR1 — VRAM (emulated, not backed by real host RAM)
+ *  Returns zeros on read, discards writes. This avoids allocating
+ *  gigabytes of host memory for the VRAM BAR.
  * ════════════════════════════════════════════════════════════════ */
-/* BAR1 is backed by plain RAM — no special ops needed */
+static uint64_t emulated_nvidia_vram_read(void *opaque, hwaddr addr,
+                                           unsigned size)
+{
+    /* Return 0 for all VRAM reads — no real framebuffer data */
+    return 0;
+}
+
+static void emulated_nvidia_vram_write(void *opaque, hwaddr addr,
+                                        uint64_t val, unsigned size)
+{
+    /* Discard all VRAM writes — no real framebuffer */
+}
+
+static const MemoryRegionOps emulated_nvidia_vram_ops = {
+    .read = emulated_nvidia_vram_read,
+    .write = emulated_nvidia_vram_write,
+    .endianness = DEVICE_LITTLE_ENDIAN,
+    .impl = {
+        .min_access_size = 1,
+        .max_access_size = 8,
+    },
+};
 
 /* ════════════════════════════════════════════════════════════════
  *  Device lifecycle
@@ -262,7 +286,10 @@ static void emulated_nvidia_gpu_realize(PCIDevice *pci_dev, Error **errp)
                      PCI_BASE_ADDRESS_MEM_TYPE_32,
                      &s->mmio_bar);
 
-    /* BAR1: VRAM (prefetchable, 64-bit capable) */
+    /* BAR1: VRAM (prefetchable, 64-bit capable)
+     * Uses IO ops instead of real RAM to avoid allocating gigabytes
+     * of host memory. The guest sees the correct BAR size but reads
+     * return 0 and writes are discarded. */
     vram_bar_size = (uint64_t)s->vram_size_mb * MiB;
     if (vram_bar_size < GPU_VRAM_BAR_MIN) {
         vram_bar_size = GPU_VRAM_BAR_MIN;
@@ -271,12 +298,10 @@ static void emulated_nvidia_gpu_realize(PCIDevice *pci_dev, Error **errp)
     /* Round up to power of 2 for PCI BAR alignment */
     vram_bar_size = 1ULL << (64 - __builtin_clzll(vram_bar_size - 1));
 
-    memory_region_init_ram(&s->vram_bar, OBJECT(s),
-                           "emulated-nvidia-gpu-vram",
-                           vram_bar_size, errp);
-    if (*errp) {
-        return;
-    }
+    memory_region_init_io(&s->vram_bar, OBJECT(s),
+                          &emulated_nvidia_vram_ops, s,
+                          "emulated-nvidia-gpu-vram",
+                          vram_bar_size);
     pci_register_bar(pci_dev, 1,
                      PCI_BASE_ADDRESS_SPACE_MEMORY |
                      PCI_BASE_ADDRESS_MEM_TYPE_64 |
@@ -336,7 +361,7 @@ static const VMStateDescription vmstate_emulated_nvidia_gpu = {
 /* ════════════════════════════════════════════════════════════════
  *  Properties
  * ════════════════════════════════════════════════════════════════ */
-static Property emulated_nvidia_gpu_properties[] = {
+static const Property emulated_nvidia_gpu_properties[] = {
     DEFINE_PROP_UINT32("gpu_device_id", EmulatedNvidiaGPUState,
                        gpu_device_id, DEFAULT_GPU_DEVICE_ID),
     DEFINE_PROP_UINT32("gpu_subsystem_id", EmulatedNvidiaGPUState,
@@ -345,7 +370,6 @@ static Property emulated_nvidia_gpu_properties[] = {
                        vram_size_mb, DEFAULT_VRAM_SIZE_MB),
     DEFINE_PROP_STRING("gpu_name", EmulatedNvidiaGPUState,
                        gpu_name),
-    DEFINE_PROP_END_OF_LIST(),
 };
 
 /* ════════════════════════════════════════════════════════════════
@@ -364,7 +388,7 @@ static void emulated_nvidia_gpu_class_init(ObjectClass *klass, void *data)
     pc->revision = 0xA1;
 
     dc->desc = "Emulated NVIDIA GPU (PCI identity only, no rendering)";
-    dc->reset = emulated_nvidia_gpu_reset;
+    device_class_set_legacy_reset(dc, emulated_nvidia_gpu_reset);
     dc->vmsd = &vmstate_emulated_nvidia_gpu;
     device_class_set_props(dc, emulated_nvidia_gpu_properties);
 
